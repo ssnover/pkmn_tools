@@ -44,3 +44,17 @@ fn verify_no_held_item() {
     let pkmn = pk3::Pokemon::from_bytes(&pk3_data).unwrap();
     assert_eq!(pkmn.held_item, None);
 }
+
+#[test]
+fn verify_personality_value() {
+    let pk3_data = open_pk3("bins/pk3/squirtle.pk3").unwrap();
+    let pkmn = pk3::Pokemon::from_bytes(&pk3_data).unwrap();
+    assert_eq!(pkmn.personality_value, 2368673094);
+}
+
+#[test]
+fn verify_ot_id() {
+    let pk3_data = open_pk3("bins/pk3/squirtle.pk3").unwrap();
+    let pkmn = pk3::Pokemon::from_bytes(&pk3_data).unwrap();
+    assert_eq!(pkmn.original_trainer_id, 1798070812);
+}

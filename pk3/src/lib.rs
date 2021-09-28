@@ -9,6 +9,8 @@ pub use held_item::HeldItem;
 pub const PK3_SIZE: usize = 100;
 
 pub struct Pokemon {
+    pub personality_value: u32,
+    pub original_trainer_id: u32,
     pub species: u16,
     pub level: u8,
     pub friendship: u8,
@@ -33,6 +35,12 @@ impl Pokemon {
         }
 
         let mut cursor = Cursor::new(&vec_data);
+        cursor.seek(SeekFrom::Start(0)).unwrap();
+        let personality_value = cursor.read_u32::<LittleEndian>().unwrap();
+
+        cursor.seek(SeekFrom::Start(4)).unwrap();
+        let original_trainer_id = cursor.read_u32::<LittleEndian>().unwrap();
+
         cursor.seek(SeekFrom::Start(32)).unwrap();
         let species = cursor.read_u16::<LittleEndian>().unwrap();
 
@@ -52,6 +60,8 @@ impl Pokemon {
         let level = cursor.read_u8().unwrap();
 
         Some(Pokemon {
+            personality_value,
+            original_trainer_id,
             species,
             level,
             friendship,
