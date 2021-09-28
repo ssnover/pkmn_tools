@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-sav_frlgrse = { path = "../sav_frlgrse" }
 pk3 = { path = "../pk3" }
+pk4 = { path = "../pk4" }
+sav_frlgrse = { path = "../sav_frlgrse" }
