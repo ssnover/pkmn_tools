@@ -7,6 +7,8 @@ pub const PK3_SIZE: usize = 100;
 pub struct Pokemon {
     pub species: u16,
     pub level: u8,
+    pub friendship: u8,
+    pub experience: u32,
 }
 
 impl Pokemon {
@@ -29,10 +31,16 @@ impl Pokemon {
         cursor.seek(SeekFrom::Start(32)).unwrap();
         let species = cursor.read_u16::<LittleEndian>().unwrap();
 
+        cursor.seek(SeekFrom::Start(36)).unwrap();
+        let experience = cursor.read_u32::<LittleEndian>().unwrap();
+
+        cursor.seek(SeekFrom::Start(41)).unwrap();
+        let friendship = cursor.read_u8().unwrap();
+
         cursor.seek(SeekFrom::Start(84)).unwrap();
         let level = cursor.read_u8().unwrap();
 
-        Some(Pokemon { species, level })
+        Some(Pokemon { species, level, friendship, experience })
     }
 }
 
