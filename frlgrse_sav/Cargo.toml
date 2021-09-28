@@ -1,0 +1,9 @@
+[package]
+name = "frlgrse_sav"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+byteorder = "1.4"
+num-derive = "0.3"
+num-traits = "0.2"

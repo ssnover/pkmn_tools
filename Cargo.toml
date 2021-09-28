@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "frlgrse_sav",
+    "pk3",
+    "integration_tests"
+]
