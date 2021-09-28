@@ -37,3 +37,10 @@ fn verify_experience() {
     let pkmn = pk3::Pokemon::from_bytes(&pk3_data).unwrap();
     assert_eq!(pkmn.experience, 293);
 }
+
+#[test]
+fn verify_no_held_item() {
+    let pk3_data = open_pk3(&"bins/pk3/squirtle.pk3").unwrap();
+    let pkmn = pk3::Pokemon::from_bytes(&pk3_data).unwrap();
+    assert_eq!(pkmn.held_item, None);
+}

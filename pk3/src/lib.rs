@@ -1,6 +1,10 @@
 use byteorder::{ByteOrder, LittleEndian, ReadBytesExt};
+use num_traits::FromPrimitive;
 use std::io::prelude::*;
 use std::io::{Cursor, SeekFrom};
+
+pub mod held_item;
+pub use held_item::HeldItem;
 
 pub const PK3_SIZE: usize = 100;
 
@@ -9,6 +13,7 @@ pub struct Pokemon {
     pub level: u8,
     pub friendship: u8,
     pub experience: u32,
+    pub held_item: Option<HeldItem>,
 }
 
 impl Pokemon {
@@ -31,6 +36,12 @@ impl Pokemon {
         cursor.seek(SeekFrom::Start(32)).unwrap();
         let species = cursor.read_u16::<LittleEndian>().unwrap();
 
+        cursor.seek(SeekFrom::Start(34)).unwrap();
+        let held_item = match cursor.read_u16::<LittleEndian>().unwrap() {
+            0 => None,
+            n => Some(FromPrimitive::from_u16(n).unwrap()),
+        };
+
         cursor.seek(SeekFrom::Start(36)).unwrap();
         let experience = cursor.read_u32::<LittleEndian>().unwrap();
 
@@ -40,7 +51,13 @@ impl Pokemon {
         cursor.seek(SeekFrom::Start(84)).unwrap();
         let level = cursor.read_u8().unwrap();
 
-        Some(Pokemon { species, level, friendship, experience })
+        Some(Pokemon {
+            species,
+            level,
+            friendship,
+            experience,
+            held_item,
+        })
     }
 }
 
