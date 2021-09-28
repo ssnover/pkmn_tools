@@ -4,7 +4,7 @@ This repo hopes to eventually contain a set of a well tested tools and libraries
 
 ## Organization
 
-The Cargo workspace contains subdirectories defining other crates for manipulating a format of Pokemon binary (e.g. `pk3` for GameBoy Advance generation games like Ruby and FireRed), manipulating save file binaries (e.g. `frlgrse_sav` for GameBoy Advance generation game save files), and currently a single crate which tests the public-facing APIs of all of the other crates (`integration_tests`). The test crate also holds all of the binary files in the repo.
+The Cargo workspace contains subdirectories defining other crates for manipulating a format of Pokemon binary (e.g. `pk3` for GameBoy Advance generation games like Ruby and FireRed), manipulating save file binaries (e.g. `sav_frlgrse` for GameBoy Advance generation game save files), and currently a single crate which tests the public-facing APIs of all of the other crates (`integration_tests`). The test crate also holds all of the binary files in the repo.
 
 ## Help Wanted
 
