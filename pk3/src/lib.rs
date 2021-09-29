@@ -3,6 +3,8 @@ use num_traits::FromPrimitive;
 use std::io::prelude::*;
 use std::io::{Cursor, SeekFrom};
 
+use pkmn_utils::Species;
+
 pub mod held_item;
 pub use held_item::HeldItem;
 
@@ -11,7 +13,7 @@ pub const PK3_SIZE: usize = 100;
 pub struct Pokemon {
     pub personality_value: u32,
     pub original_trainer_id: u32,
-    pub species: u16,
+    pub species: Species,
     pub level: u8,
     pub friendship: u8,
     pub experience: u32,
@@ -43,6 +45,7 @@ impl Pokemon {
 
         cursor.seek(SeekFrom::Start(32)).unwrap();
         let species = cursor.read_u16::<LittleEndian>().unwrap();
+        let species = FromPrimitive::from_u16(species).unwrap();
 
         cursor.seek(SeekFrom::Start(34)).unwrap();
         let held_item = match cursor.read_u16::<LittleEndian>().unwrap() {
@@ -71,7 +74,7 @@ impl Pokemon {
     }
 }
 
-fn decrypt_pokemon(pk3_data: &mut Vec<u8>) {
+pub fn decrypt_pokemon(pk3_data: &mut Vec<u8>) {
     let mut cursor = Cursor::new(&pk3_data);
     let personality_value = cursor.read_u32::<LittleEndian>().unwrap();
     let original_trainer_id = cursor.read_u32::<LittleEndian>().unwrap();

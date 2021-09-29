@@ -6,4 +6,5 @@ edition = "2018"
 [dependencies]
 pk3 = { path = "../pk3" }
 pk4 = { path = "../pk4" }
+pkmn_utils = { path = "../pkmn_utils" }
 sav_frlgrse = { path = "../sav_frlgrse" }

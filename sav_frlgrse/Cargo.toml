@@ -3,7 +3,13 @@ name = "sav_frlgrse"
 version = "0.1.0"
 edition = "2018"
 
+[[bin]]
+path = "src/pokemon_extractor.rs"
+name = "frlgrse_pokemon_extractor"
+
 [dependencies]
 byteorder = "1.4"
+clap = "3.0.0-beta.4"
 num-derive = "0.3"
 num-traits = "0.2"
+pk3 = { path = "../pk3" }

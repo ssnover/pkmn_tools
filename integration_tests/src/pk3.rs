@@ -3,6 +3,8 @@
 use std::io::Read;
 use std::path::Path;
 
+use pkmn_utils::Species;
+
 fn open_pk3<P: AsRef<Path>>(path: P) -> std::io::Result<[u8; pk3::PK3_SIZE]> {
     let mut pk3_file = std::fs::File::open(path)?;
     let mut pk3_data = [0u8; pk3::PK3_SIZE];
@@ -21,7 +23,7 @@ fn verify_level() {
 fn verify_species() {
     let pk3_data = open_pk3("bins/pk3/squirtle.pk3").unwrap();
     let pkmn = pk3::Pokemon::from_bytes(&pk3_data).unwrap();
-    assert_eq!(pkmn.species, 7);
+    assert_eq!(pkmn.species, Species::Squirtle);
 }
 
 #[test]

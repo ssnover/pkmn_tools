@@ -2,6 +2,7 @@
 members = [
     "pk3",
     "pk4",
+    "pkmn_utils",
     "sav_frlgrse",
     "integration_tests"
 ]
