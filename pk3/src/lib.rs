@@ -1,5 +1,7 @@
 use byteorder::{ByteOrder, LittleEndian, ReadBytesExt};
+use num_derive::{FromPrimitive, ToPrimitive};
 use num_traits::FromPrimitive;
+use std::convert::TryInto;
 use std::io::prelude::*;
 use std::io::{Cursor, SeekFrom};
 
@@ -10,14 +12,47 @@ pub use held_item::HeldItem;
 
 pub const PK3_SIZE: usize = 100;
 
+pub struct Stats {
+    pub hp: u16,
+    pub attack: u16,
+    pub defense: u16,
+    pub speed: u16,
+    pub special_attack: u16,
+    pub special_defense: u16,
+}
+
+pub struct ContestStats {
+    pub coolness: u8,
+    pub beauty: u8,
+    pub cuteness: u8,
+    pub smartness: u8,
+    pub toughness: u8,
+    pub feel: u8,
+}
+
+pub struct PokerusStatus {
+    pub days_left: u8,
+    pub strain: u8,
+}
+
 pub struct Pokemon {
     pub personality_value: u32,
     pub original_trainer_id: u32,
+    pub nickname: [u8; 10],
+    pub language: Language,
+    pub original_trainer_name: [u8; 7],
+    pub markings: u8,
     pub species: Species,
     pub level: u8,
     pub friendship: u8,
     pub experience: u32,
+    pub pp_bonuses: u8,
     pub held_item: Option<HeldItem>,
+    pub moves: [u16; 4],
+    pub power_points: [u8; 4],
+    pub effort_values: Stats,
+    pub contest_stats: ContestStats,
+    pub pokerus: PokerusStatus,
 }
 
 impl Pokemon {
@@ -37,27 +72,63 @@ impl Pokemon {
         }
 
         let mut cursor = Cursor::new(&vec_data);
-        cursor.seek(SeekFrom::Start(0)).unwrap();
         let personality_value = cursor.read_u32::<LittleEndian>().unwrap();
-
-        cursor.seek(SeekFrom::Start(4)).unwrap();
         let original_trainer_id = cursor.read_u32::<LittleEndian>().unwrap();
+        
+        // TODO: Try parsing the buffer in some way to be readable
+        let mut nickname_buffer = [0u8; 10];
+        cursor.read_exact(&mut nickname_buffer).unwrap();
+
+        let language = FromPrimitive::from_u16(cursor.read_u16::<LittleEndian>().unwrap()).unwrap();
+
+        // TODO: Try parsing into a string?
+        let mut ot_name_buffer = [0u8; 7];
+        cursor.read_exact(&mut ot_name_buffer).unwrap();
+
+        let markings = cursor.read_u8().unwrap();
 
         cursor.seek(SeekFrom::Start(32)).unwrap();
         let species = cursor.read_u16::<LittleEndian>().unwrap();
         let species = FromPrimitive::from_u16(species).unwrap();
 
-        cursor.seek(SeekFrom::Start(34)).unwrap();
         let held_item = match cursor.read_u16::<LittleEndian>().unwrap() {
             0 => None,
             n => Some(FromPrimitive::from_u16(n).unwrap()),
         };
 
-        cursor.seek(SeekFrom::Start(36)).unwrap();
         let experience = cursor.read_u32::<LittleEndian>().unwrap();
-
-        cursor.seek(SeekFrom::Start(41)).unwrap();
+        let pp_bonuses = cursor.read_u8().unwrap();
         let friendship = cursor.read_u8().unwrap();
+        let _ = cursor.read_u16::<LittleEndian>().unwrap();
+
+        let moves: Vec<_> = (0..4).into_iter().map(|_i| cursor.read_u16::<LittleEndian>().unwrap()).collect();
+        let moves: [u16; 4] = moves[0..4].try_into().unwrap();
+        let power_points: Vec<_> = (0..4).into_iter().map(|_i| cursor.read_u8().unwrap()).collect();
+        let power_points: [u8; 4] = power_points[0..4].try_into().unwrap();
+
+        let evs = Stats {
+            hp: cursor.read_u8().unwrap().into(),
+            attack: cursor.read_u8().unwrap().into(),
+            defense: cursor.read_u8().unwrap().into(),
+            speed: cursor.read_u8().unwrap().into(),
+            special_attack: cursor.read_u8().unwrap().into(),
+            special_defense: cursor.read_u8().unwrap().into(),
+        };
+
+        let contest_stats = ContestStats {
+            coolness: cursor.read_u8().unwrap(),
+            beauty: cursor.read_u8().unwrap(),
+            cuteness: cursor.read_u8().unwrap(),
+            smartness: cursor.read_u8().unwrap(),
+            toughness: cursor.read_u8().unwrap(),
+            feel: cursor.read_u8().unwrap(),
+        };
+
+        let pokerus_data = cursor.read_u8().unwrap();
+        let pokerus = PokerusStatus {
+            days_left: pokerus_data & 0x0f,
+            strain: (pokerus_data & 0xf0) >> 4,
+        };
 
         cursor.seek(SeekFrom::Start(84)).unwrap();
         let level = cursor.read_u8().unwrap();
@@ -65,11 +136,21 @@ impl Pokemon {
         Some(Pokemon {
             personality_value,
             original_trainer_id,
+            nickname: nickname_buffer,
+            language,
+            original_trainer_name: ot_name_buffer,
+            markings,
             species,
             level,
             friendship,
             experience,
+            pp_bonuses,
             held_item,
+            moves,
+            power_points,
+            effort_values: evs,
+            contest_stats,
+            pokerus,
         })
     }
 }
@@ -128,4 +209,16 @@ pub fn decrypt_pokemon(pk3_data: &mut Vec<u8>) {
     };
 
     pk3_data[32..80].clone_from_slice(&rearranged_data[..(80 - 32)])
+}
+
+#[repr(u16)]
+#[derive(FromPrimitive, ToPrimitive)]
+pub enum Language {
+    Japanese = 0x0201,
+    English = 0x0202,
+    French = 0x0203,
+    Italian = 0x0204,
+    German = 0x0205,
+    Korean = 0x0206,
+    Spanish = 0x0207,
 }
